@@ -1,0 +1,145 @@
+name: Docker Staging
+
+on:
+  push:
+    branches: ['stg']
+  pull_request:
+    branches: ['stg']
+
+env:
+  DOCKER_REGISTRY: docker.io
+  DOCKER_IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME || github.repository }}/arena-frontend
+  DEFAULT_BRANCH: stg
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Debug GitHub context and images
+        run: |
+          echo "GitHub SHA: ${{ github.sha }}"
+          echo "GitHub ref: ${{ github.ref }}"
+          echo "GitHub run number: ${{ github.run_number }}"
+          echo "GitHub repository: ${{ github.repository }}"
+          echo "GitHub workflow: ${{ github.workflow }}"
+          echo "Frontend image: ${{ env.DOCKER_IMAGE_FRONTEND }}"
+          ls -la
+
+      - name: Generate Docker tag
+        id: docker_tag
+        run: |
+          SHA_SHORT=$(echo ${{ github.sha }} | cut -c1-7)
+          TIMESTAMP=$(date +%Y%m%d-%H%M)
+          echo "DOCKER_TAG=stg-${TIMESTAMP}-${SHA_SHORT}" >> $GITHUB_ENV
+          echo "Generated Docker tag: stg-${TIMESTAMP}-${SHA_SHORT}"
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          buildkitd-flags: --debug
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: staging.Dockerfile
+          target: staging
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE_FRONTEND }}:${{ env.DOCKER_TAG }}
+            ${{ env.DOCKER_IMAGE_FRONTEND }}:staging-latest
+          build-args: |
+            NEXT_PUBLIC_HOST_API=${{ secrets.STG_NEXT_PUBLIC_HOST_API }}
+            NEXT_PUBLIC_ASSETS_API=${{ secrets.STG_NEXT_PUBLIC_ASSETS_API }}
+            PORT=${{ secrets.PORT }}
+            GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+            GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+            GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+            FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+            FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}
+            FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}
+            GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }}
+            GA_API_SECRET=${{ secrets.GA_API_SECRET }}
+          cache-from: type=registry,ref=${{ env.DOCKER_IMAGE_FRONTEND }}:staging-cache
+          cache-to: type=registry,ref=${{ env.DOCKER_IMAGE_FRONTEND }}:staging-cache,mode=max
+
+      - name: Deploy to staging server
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DOCKER_TAG: ${{ env.DOCKER_TAG }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/stg_arena_key
+          chmod 600 ~/.ssh/stg_arena_key
+
+          # Create SSH config
+          cat > ~/.ssh/config << EOF
+          Host deploy_host
+            HostName ${{ secrets.DEPLOY_HOST }}
+            User ${{ secrets.DEPLOY_USER }}
+            IdentityFile ~/.ssh/stg_arena_key
+            StrictHostKeyChecking no
+          EOF
+
+          chmod 600 ~/.ssh/config
+
+          # Create deployment directory
+          ssh deploy_host "mkdir -p ~/arena-frontend"
+
+          # Copy deployment files
+          scp docker-compose.staging.yml deploy_host:~/arena-frontend/
+
+          # Create .env file for staging
+          cat > .env.staging << EOF
+          # Docker Configuration
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_TAG=${DOCKER_TAG}
+
+          # Application Configuration
+          NODE_ENV=production
+          PORT=${{ secrets.PORT }}
+          NEXT_PUBLIC_HOST_API=${{ secrets.STG_NEXT_PUBLIC_HOST_API }}
+          NEXT_PUBLIC_ASSETS_API=${{ secrets.STG_NEXT_PUBLIC_ASSETS_API }}
+
+          # OAuth Configuration
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_CALLBACK_URL=${{ secrets.GOOGLE_CALLBACK_URL }}
+
+          # Firebase Configuration
+          FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}
+
+          # Analytics Configuration
+          GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }}
+          GA_API_SECRET=${{ secrets.GA_API_SECRET }}
+          EOF
+
+          scp .env.staging deploy_host:~/arena-frontend/.env
+
+          # Deploy on remote server
+          ssh deploy_host "cd ~/arena-frontend && \
+            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} && \
+            export DOCKER_TAG=${DOCKER_TAG} && \
+            docker compose -f docker-compose.staging.yml pull && \
+            docker compose -f docker-compose.staging.yml up -d --force-recreate && \
+            docker compose -f docker-compose.staging.yml ps"

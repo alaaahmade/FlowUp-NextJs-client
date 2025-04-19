@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: ${DOCKERHUB_USERNAME:?DOCKERHUB_USERNAME is required}/arena-frontend:${DOCKER_TAG:-latest}
+    build:
+      context: .
+      dockerfile: staging.Dockerfile
+      target: staging
+      args:
+        - NODE_ENV=staging
+        - NEXT_PUBLIC_HOST_API=${NEXT_PUBLIC_HOST_API}
+        - NEXT_PUBLIC_ASSETS_API=${NEXT_PUBLIC_ASSETS_API}
+        - PORT=${PORT:-3000}
+        - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+        - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+        - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
+        - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+        - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+        - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+        - GA_MEASUREMENT_ID=${GA_MEASUREMENT_ID}
+        - GA_API_SECRET=${GA_API_SECRET}
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    environment:
+      - NODE_ENV=staging
+      - NEXT_PUBLIC_HOST_API=${NEXT_PUBLIC_HOST_API}
+      - NEXT_PUBLIC_ASSETS_API=${NEXT_PUBLIC_ASSETS_API}
+      - PORT=${PORT:-3000}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
+      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      - GA_MEASUREMENT_ID=${GA_MEASUREMENT_ID}
+      - GA_API_SECRET=${GA_API_SECRET}
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:${PORT:-3000}/api/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    restart: unless-stopped
+
+networks:
+  default:
+    name: arena-frontend-staging
+    driver: bridge
