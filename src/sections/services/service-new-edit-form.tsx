@@ -465,7 +465,7 @@ export default function ServiceNewEditForm({ currentService }: Props) {
               >
                 <MenuItem value={0}>Gym Sessions</MenuItem>
                 <MenuItem value={1}>Yoga Class</MenuItem>
-                <MenuItem value={2}>Padl Arena</MenuItem>
+                <MenuItem value={2}>Padl FlowUp</MenuItem>
               </Select>
               </FormControl>
 

@@ -1,8 +1,8 @@
-# 🏰 Arena Frontend - Sprint Overview
+# 🏰 FlowUp Frontend - Sprint Overview
 
 ## 📌 Project Description
 
-Arena's frontend is built using **Next.js**, providing a fast, scalable, and SEO-friendly interface for users. This sprint focuses on **setting up the project structure, implementing authentication pages, and automating CI/CD** to ensure a smooth development workflow.
+FlowUp's frontend is built using **Next.js**, providing a fast, scalable, and SEO-friendly interface for users. This sprint focuses on **setting up the project structure, implementing authentication pages, and automating CI/CD** to ensure a smooth development workflow.
 
 ---
 
@@ -24,7 +24,7 @@ Arena's frontend is built using **Next.js**, providing a fast, scalable, and SEO
 
 ## 🌜 Frontend Routes
 
-📌 **Base URL:** `https://arena.com`  
+📌 **Base URL:** `https://FlowUp.com`  
 📌 **Authentication Pages:**  
 | Route | Description | Protected |
 |----------------------|----------------------------------|------------|
@@ -51,8 +51,8 @@ Arena's frontend is built using **Next.js**, providing a fast, scalable, and SEO
 ### **1️⃣ Clone the Repository**
 
 ```bash
-git clone https://github.com/your-repo/arena-frontend.git
-cd arena-frontend
+git clone https://github.com/your-repo/FlowUp-frontend.git
+cd FlowUp-frontend
 ```
 
 ### **2️⃣ Set Up Environment Variables**
@@ -60,7 +60,7 @@ cd arena-frontend
 Create a `.env.local` file and configure API settings:
 
 ```ini
-NEXT_PUBLIC_API_URL=https://api.arena.com
+NEXT_PUBLIC_API_URL=https://api.FlowUp.com
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
 NEXT_PUBLIC_APPLE_CLIENT_ID=your-apple-client-id
 ```

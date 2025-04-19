@@ -17,7 +17,7 @@ const items = [
   },
   {
     id: 2,
-    title: 'Padel Arena Reservation',
+    title: 'Padel FlowUp Reservation',
     date: '2:00 PM - 3:00PM',
   },
 ];

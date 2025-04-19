@@ -8,7 +8,7 @@ on:
 
 env:
   DOCKER_REGISTRY: docker.io
-  DOCKER_IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME || github.repository }}/arena-frontend
+  DOCKER_IMAGE_FRONTEND: ${{ secrets.DOCKERHUB_USERNAME || github.repository }}/FlowUp-frontend
   DEFAULT_BRANCH: stg
 
 jobs:
@@ -87,25 +87,25 @@ jobs:
         run: |
           # Setup SSH
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/stg_arena_key
-          chmod 600 ~/.ssh/stg_arena_key
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/stg_FlowUp_key
+          chmod 600 ~/.ssh/stg_FlowUp_key
 
           # Create SSH config
           cat > ~/.ssh/config << EOF
           Host deploy_host
             HostName ${{ secrets.DEPLOY_HOST }}
             User ${{ secrets.DEPLOY_USER }}
-            IdentityFile ~/.ssh/stg_arena_key
+            IdentityFile ~/.ssh/stg_FlowUp_key
             StrictHostKeyChecking no
           EOF
 
           chmod 600 ~/.ssh/config
 
           # Create deployment directory
-          ssh deploy_host "mkdir -p ~/arena-frontend"
+          ssh deploy_host "mkdir -p ~/FlowUp-frontend"
 
           # Copy deployment files
-          scp docker-compose.staging.yml deploy_host:~/arena-frontend/
+          scp docker-compose.staging.yml deploy_host:~/FlowUp-frontend/
 
           # Create .env file for staging
           cat > .env.staging << EOF
@@ -134,10 +134,10 @@ jobs:
           GA_API_SECRET=${{ secrets.GA_API_SECRET }}
           EOF
 
-          scp .env.staging deploy_host:~/arena-frontend/.env
+          scp .env.staging deploy_host:~/FlowUp-frontend/.env
 
           # Deploy on remote server
-          ssh deploy_host "cd ~/arena-frontend && \
+          ssh deploy_host "cd ~/FlowUp-frontend && \
             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} && \
             export DOCKER_TAG=${DOCKER_TAG} && \
             docker compose -f docker-compose.staging.yml pull && \

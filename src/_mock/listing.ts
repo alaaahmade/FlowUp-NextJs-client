@@ -237,7 +237,7 @@ export const listing = [
   },
   {
     id: '4',
-    title: 'Padel Arena Reservation',
+    title: 'Padel FlowUp Reservation',
     class: true,
     publish: false,
     credits: 30,
@@ -291,7 +291,7 @@ export const listing = [
     ratings,
     reviews,
     images: ['https://s3-alpha-sig.figma.com/img/d62d/0988/9a1bb40a1f1da5f8cf5970656642a438?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Y~8HVE48j7BzFGbAFqeKyW31-62MdwE5LcBEvPhFRBDpO3KvNQzkbIYSpX7fJkJG-rroeMUnY3egHeCUoMSicSQvBdHKcAnHR9xOXtHkTiqT9YZyuo4a4nWIKw6gZjcbmVPX3O~o-3FVVfvncHXOf3mw5ih4fNDCI1WJti9OnSV8f1LWeKmX19ryu-Q5MH6nL~4Fd2Hdbop1Q4aB6Sr~JEb3CJm6LrRawpkft2Jis5J3PLAvaQHrvXfBPgrmQM9oFkoz7~5QW9OUKfFyetuPPOsN-Fhy5Xb7KjGbHWaQqjWfqqRBDVaTVMfHirXWGwKAs8lzj~~oXZ1t6JMut9taAA__'],
-    category: 'Padel Arena',
+    category: 'Padel FlowUp',
     date: new Date(),
   },
 
