@@ -104,6 +104,7 @@ export function AuthProvider({ children }: Props) {
 
       if (accessToken && isValidToken(accessToken)) {
         setSession(accessToken);
+
         const response = await axios.get(endpoints.auth.me);
         const { user } = response.data.data;
         console.log(user);
@@ -136,6 +137,12 @@ export function AuthProvider({ children }: Props) {
     const response = await axios.post(endpoints.auth.login, {
       email,
       password,
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      withCredentials: true,
     });
     console.log(response, 'response');
 

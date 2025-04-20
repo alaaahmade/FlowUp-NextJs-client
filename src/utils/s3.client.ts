@@ -15,6 +15,7 @@ export const uploadFile = async (file: Buffer, path: string, mimeType: string): 
     Key: path,
     Body: file,
     ContentType: mimeType,
+    ACL: 'public-read', // Grant public read access to the file
   };
 
   try {
@@ -27,7 +28,7 @@ export const uploadFile = async (file: Buffer, path: string, mimeType: string): 
 };
 
 
-export const deleteFile = async (path: string): Promise<void> => {
+export const deleteFile = async (path: string): Promise<boolean> => {
   const params = {
     Bucket: S3_BUCKET.name || '',
     Key: path,
@@ -35,10 +36,13 @@ export const deleteFile = async (path: string): Promise<void> => {
 
   try {
     await s3.deleteObject(params).promise();
+    return true;
   } catch (error) {
-    console.error(error);
+    console.error('S3 Deletion Error:', error);
+    return false;
   }
 };
+
 // export 
 
 export default s3;

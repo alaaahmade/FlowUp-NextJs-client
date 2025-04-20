@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios from 'src/utils/axios';
 import { HOST_API } from 'src/config-global';
 
 interface SignDialogState {
@@ -19,9 +19,13 @@ const initialState: SignDialogState = {
 };
 
 export const gitCustomers = async () => {
-  const customer = await axios.get(`${HOST_API}users/customers`)
-
+  const customer = await axios.get(`${HOST_API}users/customers`,) 
   return customer.data.users
+}
+
+export const deleteCustomer = async (id: string) => {
+  const customer = await axios.delete(`${HOST_API}users/customers/${id}`,)
+  return customer.data
 }
 
 const signDialogSlice = createSlice({

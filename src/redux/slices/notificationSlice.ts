@@ -5,6 +5,11 @@ interface INotificationsSlice {
   target: string;
   title: string;
   content: string;
+  SOptions: any[]
+  error: {
+    [key: string]: string;
+  },
+  targetId: string;
 }
 
 const initialState: INotificationsSlice = {
@@ -12,6 +17,9 @@ const initialState: INotificationsSlice = {
   target: '',
   title: '',
   content: '',
+  error: {},
+  SOptions: [],
+  targetId: ''
 };
 
 const NotificationsSlice = createSlice({
@@ -27,9 +35,17 @@ const NotificationsSlice = createSlice({
 
     changeStateValue: (state, action: { payload: { type: keyof INotificationsSlice; value: any } }) => {
       (state[action.payload.type] as typeof action.payload.value) = action.payload.value;
-  },}
+  },
+
+  setError: (state, action) => {
+    state.error = action.payload;
+  },
+  setSOptions: (state, action) => {
+    state.SOptions = action.payload;
+  }
+}
 });
 
-export const { openNotificationsDialog, changeStateValue, closeNotificationsDialog } = NotificationsSlice.actions;
+export const { openNotificationsDialog, changeStateValue, closeNotificationsDialog,setError, setSOptions } = NotificationsSlice.actions;
 
 export default NotificationsSlice.reducer;
