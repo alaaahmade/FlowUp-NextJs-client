@@ -108,16 +108,6 @@ export function useNavData() {
               { title: 'Permissions', path: paths.dashboard.user.permission.list },
             ],
           },
-          {
-            title: 'Business',
-            path: paths.dashboard.business.root,
-            icon: ICONS.shop,
-            children: [
-              { title: 'List', path: paths.dashboard.business.list },
-              { title: 'Create', path: paths.dashboard.business.create },
-              { title: 'Types', path: paths.dashboard.business.type.list },
-            ],
-          },
         ],
       },
     ],

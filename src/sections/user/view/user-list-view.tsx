@@ -53,19 +53,6 @@ export default function UserListView() {
     dispatch(fetchRoles());
   }, [dispatch]);
 
-  // const handleEditRole = useCallback(
-  //   async (userId: number, newRole: string) => {
-  //     try {
-  //       await dispatch(updateUser({ id: userId, data: { roles: [Number(newRole)] } })).unwrap();
-  //       enqueueSnackbar('Role updated successfully', { variant: 'success' });
-  //     } catch (error) {
-  //       console.error(error);
-  //       enqueueSnackbar('Failed to update role', { variant: 'error' });
-  //     }
-  //   },
-  //   [dispatch, enqueueSnackbar]
-  // );
-
   const handleDeleteUser = useCallback(
     async (userId: number) => {
       try {
