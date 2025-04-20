@@ -61,12 +61,21 @@ type Props = {
 export default function RootLayout({ children }: Props) {
   return (
     <html lang="en" className={primaryFont.className}>
-      <head >
-                <link
+      <head>
+        <link
           href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;700&family=Public+Sans:wght@400;700&display=swap"
           rel="stylesheet"
         />
       </head>
+      <style>{`
+          @font-face {
+            font-family: 'Barlow';
+            src: url('/fonts/Barlow-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+          }
+        `}</style>
       <body>
         <ReduxProvider>
           <Providers>
