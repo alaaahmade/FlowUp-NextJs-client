@@ -122,7 +122,7 @@ export default function TwoView() {
             borderRadius: 2,
           }}
         >
-          {currentListing.length > 0 ? (
+          {Array.isArray(currentListing) && currentListing.length > 0 ? (
             currentListing.map(({ id, title, images, hours, vendor, credits }) => (
               <ListingCard 
                 key={id}

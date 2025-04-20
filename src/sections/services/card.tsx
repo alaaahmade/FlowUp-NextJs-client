@@ -1,4 +1,4 @@
-import { Avatar, Box, Typography } from '@mui/material';
+import { Avatar, Box, ListItemText, Typography } from '@mui/material';
 import { useRouter } from 'next/navigation';
 // import { useRouter } from 'next/router';
 
@@ -6,7 +6,11 @@ interface ListingCardProps {
   title: string;
   images: string[];
   hours?: number;  // Optional, in case `hours` is not always available
-  vendor?: string,
+  vendor?: {
+    fullName: string;
+    picture: string;  
+    email: string
+  },
   credits: number
   id: string
 }
@@ -57,8 +61,16 @@ export default function ListingCard({ title, images, hours, vendor, credits, id 
           fontSize: '12px'
         }}
       >
-      <Avatar sx={{ml: '1em', width: '1.3em', height: '1.3em' }} src='https://s3-alpha-sig.figma.com/img/d198/ec7d/fabd67194782f154fd13d96e9dcf139d?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=fE1YUyowk8-pIfEeeHc-ktOT1BWbyxvQdGy6zNGS1tUI~PT~CRrxuLnHKwhzOSZmFzSXzepOD~sz0uWRSxoV41ff4fNegEmtQif9pKhMEs7dM0OpcsFu8FYLWK6C-vCCQmb58vUCgMJFO63rby6WKC9sGN6dtBFYWj8qZ7Z-EQmd9r~bxZyt7HbjKRdYLUpMbm-Su7CF8oBhnAsu1A5Vd62lZZykVrxpH7dbXSkDjkuI4thq2o43eSjPDAiS-wiYXRLCTBT-6zgfyFDhEX55AL49U6MzLaKScPyZoix519feveswGvlH1oAv86CEYrai6y9gGqKtmMvmjN50umPdfQ__'/>
-        {vendor}
+                <Avatar alt={vendor?.fullName} src={vendor?.picture} sx={{ mr: 2 }} />
+      
+                <ListItemText
+                  primary={vendor?.fullName}
+                  primaryTypographyProps={{ typography: 'body2' }}
+                  secondaryTypographyProps={{
+                    component: 'span',
+                    color: 'text.disabled',
+                  }}
+                />
 
       </Typography>
       <Typography variant='h6' sx={{ m: '1em' }}>{credits} Credits</Typography>
