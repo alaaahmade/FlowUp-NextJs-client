@@ -37,7 +37,8 @@ export default function ProductDetailsReview({
 }: Props) {
   const review = useBoolean();
 
-
+    console.log(totalReviews);
+    
   const renderSummary = (
     <Stack spacing={1} alignItems="center" justifyContent="center">
       <Typography variant="subtitle2">Average rating</Typography>
@@ -69,9 +70,6 @@ export default function ProductDetailsReview({
         }}
       >
         {renderSummary}
-
-       
-
         
       </Box>
 

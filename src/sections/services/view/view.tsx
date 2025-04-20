@@ -26,7 +26,7 @@ export default function TwoView() {
   const { enqueueSnackbar } = useSnackbar();
   const serviceState = useAppSelector((state) => state.service);
   const services = useMemo(() => serviceState?.services || [], [serviceState?.services]);
-  const loading = serviceState?.loading || false;
+  const loading = serviceState?.loading || false;  
   
   const [search, setSearch] = useState({
     query: '',

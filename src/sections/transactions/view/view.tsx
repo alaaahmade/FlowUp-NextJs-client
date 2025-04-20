@@ -52,12 +52,12 @@ const STATUS_OPTIONS = [
 
 
 const TABLE_HEAD = [
+  
   { id: 'name', label: 'ID',  width: 500 },
   { id: 'customer', label: 'Customer', width: 3000 },
-  { id: 'date', label: 'Date', width :1000 },
-  { id: '', width: 88 },
-  { id: 'amount', label: 'Amount', width:100},
-  { id: '', width: 88 },
+  { id: 'date', label: 'Date', width :3000 },
+  { id: 'status',label: 'Status', width: 3000 },
+  { id: 'amount', label: 'Amount', width:3000},
 ];
 
 const defaultFilters: IUserTableFilters = {

@@ -14,7 +14,7 @@ import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 //
-import { Typography } from '@mui/material';
+import { Checkbox, Typography } from '@mui/material';
 import { fDate } from 'src/utils/format-time';
 
 // ----------------------------------------------------------------------
@@ -53,10 +53,12 @@ export default function UserTableRow({
   return (
     <>
       <TableRow hover selected={selected}>
+        
+            <Checkbox checked={selected} onClick={onSelectRow} />
+        
         <TableCell padding="checkbox">
         <Typography>#{id}</Typography>
         </TableCell>
-
         <TableCell sx={{ display: 'flex', alignItems: 'center', height: '7em' }}>
           <Avatar alt={name} src={avatarUrl} sx={{ mr: 2 }} />
 
@@ -70,6 +72,7 @@ export default function UserTableRow({
             }}
           />
         </TableCell>
+        
         <TableCell sx={{ height: '7em', whiteSpace: 'wrap'}}>
         <TableCell sx={{ whiteSpace: 'wrap', p: 0, m: 0, border: 0}}>
         <span style={{ display: 'block' }}>{fDate(date, 'dd MMM yyyy')}</span>
@@ -86,6 +89,7 @@ export default function UserTableRow({
           }} />
 
             
+        </TableCell>
         <TableCell
           sx={{
             border: 0
@@ -103,15 +107,9 @@ export default function UserTableRow({
             {status}
           </Label>
         </TableCell>
-        </TableCell>
-        <TableCell />
 
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{amount}</TableCell>
-        <TableCell />
-
-
       </TableRow>
-
 
       <CustomPopover
         open={popover.open}

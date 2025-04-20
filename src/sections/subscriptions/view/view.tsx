@@ -8,10 +8,9 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Tooltip from '@mui/material/Tooltip';
+import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
-import IconButton from '@mui/material/IconButton';
 import TableContainer from '@mui/material/TableContainer';
 
 // routes
@@ -21,9 +20,8 @@ import { useRouter } from 'src/routes/hooks';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
 import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { ConfirmDialog, ProfileDialog } from 'src/components/custom-dialog';
+import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import {
   useTable,
@@ -32,46 +30,47 @@ import {
   TableNoData,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
   TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IUserItem, IUserTableFilterValue } from 'src/types/user';
+import { IUserItem, IUserTableFilters, IUserTableFilterValue } from 'src/types/user';
 //
-import { Typography } from '@mui/material';
-import { deleteCustomer, gitCustomers, setCustomer } from 'src/redux/slices/customerSignSlice';
+import {  Typography } from '@mui/material';
+// import { subscriptions } from 'src/redux/slices/subscriptionsSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { LoadingButton } from '@mui/lab';
-import UserTableRow from '../customer-table-row';
-import UserTableToolbar from '../customer-table-toolbar';
-import UserTableFiltersResult from '../customer-table-filters-result';
+import { deleteSubscriptions, fetchSubscriptions, setSubscriptions } from '@/redux/slices/subscriptionsSlice';
+import { AppDispatch, RootState } from '@/redux/store'; // Adjust the path to your store file
+import UserTableRow from '../subscriptions-table-row';
+import UserTableToolbar from '../subscriptions-table-toolbar';
+import UserTableFiltersResult from '../subscriptions-table-filters-result';
 
 // ----------------------------------------------------------------------
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'All' },
-  { value: 'Active', label: 'Active' },
-  { value: 'Banned', label: 'Banned' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'canceled', label: 'Canceled' },
 ];
 
-const TABLE_HEAD = [ 
-  { id: 'name', label: 'Name', width:800 },
-  { id: 'phoneNumber', label: 'Phone Number', width:500 },
-  { id: 'status', label: 'Status', width:100},
-  { id: '', width: 50 },
+const TABLE_HEAD = [
+  { id: 'id', label: 'ID', width: 50 },
+  { id: 'name', label: 'Name' },
+  { id: 'status', label: 'Status', width: 100 },
+  { id: 'date', label: 'Date', width: 100 },
+  { id: 'category', label: 'Category', width: 100, align: 'center' },
+  { id: 'price', label: 'Price', width: 100 },
+  { id: '',label:"", width: 100 },
 ];
 
-const defaultFilters: {
-  name: string;
-  status: string;
-} = {
+
+const defaultFilters: IUserTableFilters = {
   name: '',
   status: 'all',
+  startDate: null,
+  endDate: null,
 };
 
-// ----------------------------------------------------------------------
-
-export default function CustomersListView() {
+export default function SubscriptionsListView() {
   const table = useTable();
 
   const settings = useSettingsContext();
@@ -79,22 +78,21 @@ export default function CustomersListView() {
   const router = useRouter();
 
   const confirm = useBoolean();
-  const loading = useBoolean();
-  const [profile, setProfile] = useState(null)
-  const open = useBoolean();
-  const customers = useSelector((state: any) => state.signDialog.customers);
-  const dispatch = useDispatch();
+
+  const subscriptions = useSelector((state: RootState) => state.SubscriptionsSlice.subscriptions);
+  const dispatch: AppDispatch = useDispatch();
+
+  // const [tableData, setTableData] = useState([]);
 
   const [filters, setFilters] = useState(defaultFilters);
 
   const dataFiltered = applyFilter({
-    inputData: customers,
+    inputData: subscriptions,
     comparator: getComparator(table.order, table.orderBy),
     filters,
-  });
-  
+  });  
 
-  const dataInPage = dataFiltered.slice(
+  const dataInPage = dataFiltered?.slice(
     table.page * table.rowsPerPage,
     table.page * table.rowsPerPage + table.rowsPerPage
   );
@@ -103,7 +101,7 @@ export default function CustomersListView() {
 
   const canReset = !isEqual(defaultFilters, filters);
 
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
+  const notFound = (!dataFiltered?.length && canReset) || !dataFiltered?.length;
 
   const handleFilters = useCallback(
     (name: string, value: IUserTableFilterValue) => {      
@@ -115,19 +113,18 @@ export default function CustomersListView() {
     },
     [table]
   );
+  
 
   const handleDeleteRow = useCallback(
-    async (id: string) => {      
-      loading.onTrue();
-      const updatedCustomers = customers.filter((row: { id: string;}) => String(row.id) !== String(id));
-      await deleteCustomer(id);
-      dispatch(setCustomer({ customers: updatedCustomers }));
-      table.onUpdatePageDeleteRow(dataInPage.length);
-      loading.onFalse();
-      // confirm.onTrue();
+    (id: string) => {
+      const updatedSubscriptions = subscriptions.filter((row: { id: string;}) => row.id !== id);
+      dispatch(deleteSubscriptions(id));
+      dispatch(fetchSubscriptions());
+      dispatch(setSubscriptions(updatedSubscriptions));
+      table.onUpdatePageDeleteRow(dataInPage?.length);
     },
-    [customers, dispatch, dataInPage.length, table]
-  );  
+    [subscriptions, dispatch, dataInPage?.length, table]
+  );
 
 
   const handleEditRow = useCallback(
@@ -139,6 +136,7 @@ export default function CustomersListView() {
 
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
+      
       handleFilters('status', newValue);
     },
     [handleFilters]
@@ -147,47 +145,18 @@ export default function CustomersListView() {
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
   }, []);
+  
 
   useEffect(() => {
-    async function fetchData() {
-      const customersData = await gitCustomers();            
-      dispatch(setCustomer({
-        customers: customersData.map((user: {
-          credits: number;
-          interests: any;
-          bookings: any;
-          roles: any;
-          dateOfBirth: string;
-          createdAt: string;
-          id: string;
-          fullName: string;
-          profilePicture: string;
-          phoneNumber: string;
-          email: string;
-          status: boolean; }) => ({
-          id: user.id || '',
-          name: user.fullName || '',
-          avatarUrl: user.profilePicture || '',
-          phoneNumber: user.phoneNumber || '+1234567890123',
-          email: user.email || '',
-          status: user.status ,
-          createdAt: user.createdAt,
-          dateOfBirth: user.dateOfBirth || '',
-          role: user.roles[0].name,
-          bookings: user.bookings,
-          interests: user.interests,
-          credits: user.credits || 0,
-        })),
-      }));
-    }
-    fetchData();
-    
-  }, [dispatch]);  
+    dispatch(fetchSubscriptions());
+  }, []);
+
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
         <Typography variant="h4" sx={{ mb: 5 }}>
-          Customers
+        Subscriptions
         </Typography>
 
         <Card>
@@ -211,23 +180,19 @@ export default function CustomersListView() {
                       ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
                     }
                     color={
-                      (tab.value === 'Active' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'Banned' && 'error') ||
+                      (tab.value === 'paid' && 'success') ||
+                      (tab.value === 'canceled' && 'error') ||
                       (tab.value === 'all' && 'wGray') ||
                       'default'
                     }
                   >
-                    {tab.value === 'all' && customers.length}
-                    {tab.value === 'Active' &&
-                      customers.filter((user: { status: string;}) => user.status === 'active').length}
+                    {tab.value === 'all' && subscriptions?.length}
+                    {tab.value === 'paid' &&
+                      subscriptions?.filter((user: { status: string;}) => user.status === 'paid').length}
 
-                    {tab.value === 'pending' &&
-                      customers.filter((user:{ status: string;}) => user.status === 'bending').length}
-                    {tab.value === 'Banned' &&
-                      customers.filter((user:{ status: string;}) => user.status === 'banned').length}
-                    {tab.value === 'rejected' &&
-                      customers.filter((user:{ status: string;}) => user.status === 'rejected').length}
+                    {tab.value === 'canceled' &&
+                      subscriptions?.filter((user:{ status: string;}) => user.status === 'canceled').length}
+
                   </Label>
                 }
               />
@@ -246,30 +211,12 @@ export default function CustomersListView() {
               //
               onResetFilters={handleResetFilters}
               //
-              results={dataFiltered.length}
+              results={dataFiltered?.length}
               sx={{ p: 2.5, pt: 0 }}
             />
           )}
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={table.dense}
-              numSelected={table.selected.length}
-              rowCount={customers.length}
-              onSelectAllRows={(checked) =>
-                table.onSelectAllRows(
-                  checked,
-                  customers.map((row: { id: string;}) => String(row.id))
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={confirm.onTrue}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              }
-            />
 
             <Scrollbar>
             <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
@@ -277,20 +224,13 @@ export default function CustomersListView() {
                   order={table.order}
                   orderBy={table.orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={customers.length}
+                  rowCount={subscriptions?.length}
                   numSelected={table.selected.length}
                   onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      customers.map((row: { id: string;}) => String(row.id))
-                    )
-                  }
                 />
 
                 <TableBody>
-                  {dataFiltered
-                    .slice(
+                  {dataFiltered?.slice(
                       table.page * table.rowsPerPage,
                       table.page * table.rowsPerPage + table.rowsPerPage
                     )
@@ -302,17 +242,13 @@ export default function CustomersListView() {
                         onSelectRow={() => table.onSelectRow(String(row.id))}
                         onDeleteRow={() => handleDeleteRow(String(row.id))}
                         onEditRow={() => handleEditRow(String(row.id))}
-                        loading={loading.value}
-                        onClickRow={() => {
-                          setProfile(row)
-                          open.onTrue()
-                        }}
+
                       />
                     ))}
 
                   <TableEmptyRows
                     height={denseHeight}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, customers.length)}
+                    emptyRows={emptyRows(table.page, table.rowsPerPage, subscriptions?.length)}
                   />
 
                   <TableNoData notFound={notFound} />
@@ -322,7 +258,7 @@ export default function CustomersListView() {
           </TableContainer>
 
           <TablePaginationCustom
-            count={dataFiltered.length}
+            count={dataFiltered?.length}
             page={table.page}
             rowsPerPage={table.rowsPerPage}
             onPageChange={table.onChangePage}
@@ -344,35 +280,25 @@ export default function CustomersListView() {
           </>
         }
         action={
-          <LoadingButton
-            loading={loading.value}
+          <Button
             variant="contained"
             color="error"
             onClick={() => {
-              
-              table.selected.map((id: string) => {
-                handleDeleteRow(id);
-              });
-              
               confirm.onFalse();
-              window.location.reload();
-
             }}
           >
             Delete
-          </LoadingButton>
+          </Button>
         }
       />
-      <ProfileDialog open={open.value} user={profile} onClose={() =>{
-        open.onFalse()
-         setProfile(null)
-      }} />
     </>
   );
 }
 
 // ----------------------------------------------------------------------
-
+interface RowI {
+  user: IUserItem
+}
 function applyFilter({
   inputData,
   comparator,
@@ -380,32 +306,43 @@ function applyFilter({
 }: {
   inputData: IUserItem[] | any;
   comparator: (a: any, b: any) => number;
-  filters: {
-    name: string;
-    status: string;
-  };
+  filters: IUserTableFilters;
 }) {
-  const { name, status } = filters;
+  const { name, status, startDate, endDate } = filters;
 
-  const stabilizedThis = inputData.map((el: any, index: number) => [el, index] as const);
+  const stabilizedThis = inputData?.map((el: any, index: number) => [el, index] as const);
 
-  stabilizedThis.sort((a: number[], b: number[]) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
+    stabilizedThis?.sort((a: number[], b: number[]) => {
+      const order = comparator(a[0], b[0]);
+      if (order !== 0) return order;
+      return a[1] - b[1];
+    });
 
-  inputData = stabilizedThis.map((el: any) => el[0]);
+    inputData = stabilizedThis?.map((el: any) => el[0]);
 
-  if (name) {
+  if (name) {    
     inputData = inputData.filter(
-      (user: IUserItem) => user?.name?.toLowerCase().indexOf(name.toLowerCase()) !== -1
+      (user: RowI) => user?.user.fullName?.toLowerCase().indexOf(name.toLowerCase()) !== -1
     );
   }
 
   if (status !== 'all') {
-    inputData = inputData.filter((user: IUserItem) => (user.status?.toLocaleLowerCase()) === status.toLocaleLowerCase());
+    inputData = inputData.filter((user: IUserItem) => user.status === status);
+    console.log(inputData, status);
     
+  }
+
+  if (startDate || endDate) {
+    inputData = inputData.filter((user: IUserItem) => {
+      const transactionDate = user.date ? new Date(user.date).getTime() : 0;
+      const start = startDate ? new Date(startDate).getTime() : null;
+      const end = endDate ? new Date(endDate).getTime() : null;
+
+      return (
+        (!start || transactionDate >= start) &&
+        (!end || transactionDate <= end)
+      );
+    });
   }
 
   return inputData;

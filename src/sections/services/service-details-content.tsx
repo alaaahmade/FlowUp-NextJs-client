@@ -37,6 +37,7 @@ export default function TourDetailsContent({service}: any) {
   const [currentDay, setCurrentDay] = useState<string>(service?.availability?.days[0]?.day || '');
 
   const [SpecificData, setSpecificData] = useState<Date>(new Date())
+  
 
 
   const handleChange = (event: SelectChangeEvent<typeof KindOfServiceDate>) => {
@@ -46,7 +47,8 @@ export default function TourDetailsContent({service}: any) {
     setKindOfServiceDate(
        value,
     );
-  };  const renderDetails = (
+  };  
+  const renderDetails = (
       <Stack alignItems='center' justifyContent='space-between' sx={{ mb: 3,width: '100%', flexDirection: { xs: 'column', md: 'row', sm: 'row' } }}>
         <Box
           sx={{
@@ -59,7 +61,7 @@ export default function TourDetailsContent({service}: any) {
           }}
         >
         <Typography variant="h5" sx={{ flexGrow: 1 }}>
-          {hours && `${hours} - Hour ` } {title}
+         {title}
         </Typography>
         
     <Stack
@@ -83,7 +85,7 @@ export default function TourDetailsContent({service}: any) {
         </Typography>
 
         </Box>
-        <Image src={images[0]} ratio="1/1" sx={{ borderRadius: 2 }} />
+        <Image src={images[0]} alt="Service image" width={400} height={300} responsive ratio="1/1" sx={{ borderRadius: 2 }} />
       </Stack>
       
 
@@ -95,14 +97,14 @@ export default function TourDetailsContent({service}: any) {
       sx={{
       }}
     >
-      {availability.days.length && (
+      {availability?.days?.length>0 && (
         <>
           <Typography sx={{
             fontSize: '18px',
             mb: 2.5
           }}>Availability</Typography>
           <Typography variant="body2" sx={{  lineHeight: '22px', letterSpacing: 0, fontSize: '14px' }}>
-            {availability.days.map((day: { day: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Promise<AwaitedReactNode> | Key | null | undefined; from: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; to: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; }) => (
+            {availability?.days?.map((day: { day: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Promise<AwaitedReactNode> | Key | null | undefined; from: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; to: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; }) => (
               <Typography key={`${day.day}-${day.from}-${day.to}`} sx={{ mb: 1, display: 'flex', gap: 3, width: 1 , fontWeight: 600, fontSize: '14px'}}>
                 <span>{day.day}</span> <span>{day.from} - {day.to}</span>
               </Typography>
@@ -110,6 +112,29 @@ export default function TourDetailsContent({service}: any) {
           </Typography>
         </>
       ) }
+
+      {
+        availability?.classes?.length>0 && (
+          <>
+          <Typography sx={{
+            fontSize: '18px',
+            mb: 2.5
+          }}>Availability</Typography>
+          <Typography variant="body2" sx={{  lineHeight: '22px', letterSpacing: 0, fontSize: '14px' }}>
+            {availability.classes.map((day: {
+              sessions: any; day: boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | Promise<AwaitedReactNode> | Key | null | undefined; from: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; to: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; 
+}) => (
+              <Typography key={`${day.day}-${day.from}-${day.to}`} sx={{ mb: 1, display: 'flex', gap: 3, width: 1 , fontWeight: 600, fontSize: '14px'}}>
+                <span>{day.day}</span> {day.sessions.map((session: any) => (
+                  <span key={`${session.from}-${session.to}`}>
+                  {session.from} - {session.to}
+                </span>
+                ))}
+              </Typography>
+            ))}
+          </Typography></>
+        )}
+      
     </Box>
   );
 
@@ -152,19 +177,35 @@ export default function TourDetailsContent({service}: any) {
                 mt: 3
               }}
             >
-              {service.availability.days.length > 0 && service.availability.days.map((day: any) => 
-              <Button
-                sx={{
-                  width: '155px',
-                  fontSize: '14px',
-                  lineHeight: '22px',
-                  letterSpacing: 0,
-                  borderBottom: currentDay === day.day ?  '2px solid #000' : '0px solid #000',
-                  borderRadius: 0,
-                  fontWeight: 400
-                }}
-                onClick={()=> setCurrentDay(day.day)}
-              >{day.day} {day.from} - {day.to}</Button> )}
+              {service.availability.days.length > 0 && service.availability.days.map((day: any, index: number) => 
+                <Button
+                  key={`${day.day}-${index}`}
+                  sx={{
+                    width: '155px',
+                    fontSize: '14px',
+                    lineHeight: '22px',
+                    letterSpacing: 0,
+                    borderBottom: currentDay === day.day ?  '2px solid #000' : '0px solid #000',
+                    borderRadius: 0,
+                    fontWeight: 400
+                  }}
+                  onClick={()=> setCurrentDay(day.day)}
+                >{day.day} {day.from} - {day.to}</Button> )} 
+
+              {service.availability.classes.length > 0 && service.availability.classes.map((day: any, index: number) => 
+                <Button
+                  key={`${day.day}-${index}`}
+                  sx={{
+                    width: '155px',
+                    fontSize: '14px',
+                    lineHeight: '22px',
+                    letterSpacing: 0,
+                    borderBottom: currentDay === day.day ?  '2px solid #000' : '0px solid #000',
+                    borderRadius: 0,
+                    fontWeight: 400
+                  }}
+                  onClick={()=> setCurrentDay(day.day)}
+                >{day.day} </Button> )} 
             </Box>
             <Box/>
           </>}
@@ -179,7 +220,7 @@ export default function TourDetailsContent({service}: any) {
     ratings={service.ratings}
     reviews={service.reviews}
     totalRatings={service.totalRating}
-    totalReviews={service.totalReview}
+    totalReviews={service.totalReviews}
   />
   ) 
 

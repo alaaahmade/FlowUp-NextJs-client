@@ -19,7 +19,7 @@ interface PublishOption {
 }
 
 interface TourDetailsToolbarProps {
-  publish: Boolean | undefined;
+  publish: boolean | undefined;
   backLink: string;
   editLink: string;
   liveLink: string;

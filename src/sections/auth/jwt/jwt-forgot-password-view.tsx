@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import LoadingButton from '@mui/lab/LoadingButton';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
@@ -17,6 +16,10 @@ import { RouterLink } from 'src/routes/components';
 import { useAuthContext } from 'src/auth/hooks';
 // components
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { IconButton, InputAdornment } from '@mui/material';
+import { Icon } from '@iconify/react';
+import { useBoolean } from '@/hooks/use-boolean';
+import { StyledAuthWrapper, SubmitButton } from 'src/components/auth-components';
 
 // ----------------------------------------------------------------------
 
@@ -25,7 +28,8 @@ export default function JwtForgotPasswordView() {
 
   const [errorMsg, setErrorMsg] = useState('');
   const [sent, setSent] = useState(false);
-
+  const send = useBoolean();
+  
   const ForgetPasswordSchema = Yup.object().shape({
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
   });
@@ -76,7 +80,7 @@ export default function JwtForgotPasswordView() {
 
       <RHFTextField name="email" label="Email address" />
 
-      <LoadingButton
+      <SubmitButton
         fullWidth
         color="inherit"
         size="large"
@@ -85,7 +89,12 @@ export default function JwtForgotPasswordView() {
         loading={isSubmitting}
       >
         Send Request
-      </LoadingButton>
+        <InputAdornment position="end">
+          <IconButton onClick={send.onToggle} edge="end">
+            <Icon icon="eva:arrow-ios-forward-fill" width="24" height="24" color='#fff' />
+          </IconButton>
+        </InputAdornment>
+      </SubmitButton>
 
       <Link
         component={RouterLink}
@@ -95,6 +104,8 @@ export default function JwtForgotPasswordView() {
         sx={{
           alignItems: 'center',
           display: 'inline-flex',
+          alignSelf: 'flex-end',
+          ml: 1,
         }}
       >
         Return to sign in
@@ -103,9 +114,15 @@ export default function JwtForgotPasswordView() {
   );
 
   return (
+        <StyledAuthWrapper
+        sx={{
+          p: 4 
+        }}
+      >
     <FormProvider methods={methods} onSubmit={onSubmit}>
       {renderHead}
       {renderForm}
     </FormProvider>
+    </StyledAuthWrapper>
   );
 }

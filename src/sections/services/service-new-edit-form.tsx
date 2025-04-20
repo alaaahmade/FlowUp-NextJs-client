@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import * as Yup from 'yup';
 import { useCallback, useMemo, useEffect, Key } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -11,7 +12,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 // hooks
-import { useBoolean } from 'src/hooks/use-boolean';
 import { useResponsive } from 'src/hooks/use-responsive';
 // routes
 import { paths } from 'src/routes/paths';
@@ -26,7 +26,7 @@ import FormProvider, {
   RHFTextField,
 } from 'src/components/hook-form';
 //
-import { Availability, ListingInterface } from 'src/types/services';
+import { CreateServiceDto, ListingInterface, UpdateServiceDto } from 'src/types/services';
 import { Box, ButtonBase, FormControl, InputLabel, MenuItem, Paper, Select } from '@mui/material';
 import Iconify from 'src/components/iconify';
 
@@ -34,7 +34,10 @@ import { RHFMultiCheckbox } from 'src/components/hook-form/rhf-checkbox';
 import { TimePicker, DatePicker } from '@mui/x-date-pickers';
 import { createService, updateService } from 'src/redux/slices/serviceSlice';
 import { useAppDispatch } from 'src/redux/hooks';
-import s3, { deleteFile, uploadFile } from 'src/utils/s3.client';
+import  { deleteFile, uploadFile } from 'src/utils/s3.client';
+import { useSelector } from 'react-redux';
+import axiosInstance from '@/utils/axios';
+import { gitCategories, setCategories } from 'src/redux/slices/CategoriesSlice';
 
 // ----------------------------------------------------------------------
 
@@ -60,10 +63,10 @@ export default function ServiceNewEditForm({ currentService }: Props) {
   const router = useRouter();
   const mdUp = useResponsive('up', 'md');
   const { enqueueSnackbar } = useSnackbar();
-  const preview = useBoolean();
   const dispatch = useAppDispatch();
-  
 
+  const categories = useSelector((state: any) => state.CategoriesSlice.categories);
+  
   const NewBlogSchema = Yup.object().shape({
     name: Yup.string().required('Name is required'),
     description: Yup.string().required('Description is required'),
@@ -93,11 +96,10 @@ export default function ServiceNewEditForm({ currentService }: Props) {
       ),
     }).required('Availability is required'),
     credit: Yup.mixed().required('Price is required'),
-    price: Yup.number().required('Price is required'),
     availability_days: Yup.array().required('Availability is required'),
     isFuture: Yup.boolean(),
-    date: Yup.mixed<any>().nullable().required('Date is required'),
-    file: Yup.mixed<File>().nullable()
+    file: Yup.mixed<File>().nullable(),
+    date: Yup.mixed<any>()
   });
 
   const defaultValues = useMemo(
@@ -106,21 +108,21 @@ export default function ServiceNewEditForm({ currentService }: Props) {
       description: currentService?.description || '',
       category: currentService?.category || '',
       image: currentService?.images?.[0] || '',
-      type: currentService?.type || (currentService?.class ? 'Class' : 'Session'),
+      type: currentService?.type || (currentService?.class ? 'class' : 'session'),
       class: currentService?.class || false,
       availability: {
         days: currentService?.availability?.days || [],
         classes: currentService?.availability?.classes || [],
       },
       credit: currentService?.credits || 0,
-      price: currentService?.credits ? Number(currentService.credits) * 3 : 0,
-      availability_days: currentService?.availability?.days?.map((item) => item.day) || [],
+      availability_days: currentService?.availability?.days?.map((item) => item.day.slice(0, 3)) || 
+      currentService?.availability?.classes?.map((item) => item.day.slice(0, 3)) || [],
       isFuture: currentService?.isFuture || false,
       file: null as File | null,
       date: currentService?.date || null
     }),
     [currentService]
-  );
+  );  
 
   const methods = useForm({
     resolver: yupResolver(NewBlogSchema),
@@ -133,11 +135,10 @@ export default function ServiceNewEditForm({ currentService }: Props) {
     setValue,
     handleSubmit,
     control,
-    formState: { isSubmitting, isValid },
-  } = methods;
+    formState: { isSubmitting },
+  } = methods;  
 
   const values = watch();
-  console.log(values);
 
   useEffect(() => {
     if (currentService) {
@@ -149,62 +150,53 @@ export default function ServiceNewEditForm({ currentService }: Props) {
     if (currentService?.availability) {
       // Initialize availability days
       if (currentService.availability.days?.length) {
-        setValue('availability_days', currentService.availability.days.map(day => day.day));
+        setValue('availability_days', currentService.availability.days.map(day => day.day.slice(0, 3)));
       }
-      
-      // Initialize availability structure
-      setValue('availability', {
-        days: currentService.availability.days || [],
-        classes: currentService.availability.classes || []
-      });
-      
-      // Log for debugging
-      console.log('Initialized availability:', {
-        days: currentService.availability.days,
-        classes: currentService.availability.classes
-      });
+    
       
       // Set the type based on the service data
-      setValue('type', currentService.type || (currentService.class ? 'Class' : 'Session'));
+      setValue('type', currentService.type || (currentService.class ? 'class' : 'session'));
       
       // If it's a class type, make sure we initialize the class data correctly
-      if (currentService.type === 'Class' || currentService.class) {
+      if (currentService.type === 'class' || currentService.class) {
         // Make sure we have the class days selected in availability_days
-        const classDays = currentService.availability.classes?.map(c => c.day) || [];
+        const classDays = currentService.availability.classes?.map(c => c.day.slice(0, 3)) || [];
+        
         if (classDays.length) {
           setValue('availability_days', classDays);
         }
       }
     }
+    
   }, [currentService, setValue]);
+
+  useEffect(() => {
+    async function getCategories() {
+      try {        
+        const data = await gitCategories();
+        dispatch(setCategories(data));
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    }
+    getCategories();
+  }, [currentService]);
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       // Format availability data correctly based on API requirements
       let formattedAvailability;
       
-      if (data.type === 'Class') {
-        // For Class type, use the class sessions format
+      if (data.type === 'class') {
         formattedAvailability = {
-          days: data.availability_days.map(day => {
-            // Find the day in the availability.days array
-            const dayData = data.availability?.days?.find(d => d.day === day);
-            // Return only the properties the API expects (no id property)
-            return {
-              day,
-              value: day,
-              from: dayData?.from || '09:00',
-              to: dayData?.to || '17:00',
-            };
-          }),
-          class: data.type === 'Class'
+          class: data.availability.classes
         };
       } else {
         // For Session type, only include days
         formattedAvailability = {
           days: data.availability_days.map(day => {
             // Find the day in the availability.days array
-            const dayData = (data.availability.days ?? []).find(d => d.day === day);
+            const dayData = (data.availability.days ?? []).find(d => d.day.slice(0, 3) === day);
             // Return only the properties the API expects (no id property)
             return {
               day,
@@ -232,26 +224,23 @@ export default function ServiceNewEditForm({ currentService }: Props) {
         title: data.name,
         description: data.description,
         credits: Number(data.credit),
-        vendor: data.category,
+        category: data.category,
         availability: formattedAvailability,
         images: url ? [url] : [data.image],
         publish: true,
         isFuture: data.isFuture,
-        date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
-        class: data.type === 'Class',
+        class: data.type === 'class',
         type: data.type,
       };
       
-      console.log('Sending data to API:', JSON.stringify(serviceData));
-
       if (currentService?.id) {
         await dispatch(updateService({ 
           id: currentService.id, 
-          data: serviceData 
+          data: serviceData as UpdateServiceDto
         })).unwrap();
         enqueueSnackbar('Service updated successfully!', { variant: 'success' });
       } else {
-        await dispatch(createService(serviceData)).unwrap();
+        await dispatch(createService(serviceData as unknown as CreateServiceDto)).unwrap();
         enqueueSnackbar('Service created successfully!', { variant: 'success' });
       }
       
@@ -261,6 +250,24 @@ export default function ServiceNewEditForm({ currentService }: Props) {
       enqueueSnackbar(error.message || 'Failed to save service', { variant: 'error' });
     }
   });
+
+  const handleChangeSessionTime = (day: string, timeType: 'from' | 'to', newTime: Date) => {
+    const formattedTime = dayjs(newTime).format('HH:mm');
+  
+    const currentDays = [...(values.availability?.days || [])];
+  
+    const dayIndex = currentDays.findIndex((d) => d.day === day);
+  
+    if (dayIndex !== -1) {
+      currentDays[dayIndex] = {
+        ...currentDays[dayIndex],
+        [timeType]: formattedTime,
+      };
+  
+      setValue('availability.days', currentDays);
+    }
+  };
+  
 
   const handleDrop = useCallback(
     async(acceptedFiles: File[]) => {
@@ -341,12 +348,10 @@ export default function ServiceNewEditForm({ currentService }: Props) {
     };
   
     const days = values.availability_days;
-    const {availability} = values;
-  
-    if (values.type === 'Session') {
+    const {availability} = values;    
+    if (values.type === 'session') {
       // Ensure availability.days is an array
       const updatedAvailability = (availability.days || []).filter((item) => days.includes(item.day));
-  
       // Add new days that are in the `days` array but not in the current availability
       const newDays = days
         .filter((day) => !updatedAvailability.some((item) => item.day === day))
@@ -354,28 +359,30 @@ export default function ServiceNewEditForm({ currentService }: Props) {
           day,
           value: day,
           ...defaultTime,
-        }));
+        }));        
   
       const updatedAvailabilityDays = [...updatedAvailability, ...newDays];
   
       setValue('availability.days', updatedAvailabilityDays);
-    } else if (values.type === 'Class') {
+    } else if (values.type === 'class') {
       // Ensure availability.class is an array
       const updatedAvailabilityClass = ((availability?.classes as unknown as any[]) || []).map((item) => {
         if (days.includes(item.day)) {
           return item;
         }
         return null;
-      }).filter(Boolean);
+      }).filter(Boolean);      
   
       // Add new days for 'Class' type
       const newClassDays = days
-        .filter((day) => !updatedAvailabilityClass.some((item) => item.day === day))
-        .map((day) => ({
+      .filter((day) => !updatedAvailabilityClass.some((item) => item.day === day))
+      .map((day) => {
+        const originalDay = currentService?.availability?.classes?.find((c) => c.day.slice(0, 3) === day);
+        return {
           day,
-          sessions: [{ from: '10:00', to: '12:00' }],
-        }));
-  
+          sessions: originalDay?.sessions?.map(s => ({ from: s.from, to: s.to })) || [{ from: '10:00', to: '12:00' }],
+        };
+      });
       // Now safely update availability.class
       const updatedAvailabilityClassDays = [...updatedAvailabilityClass, ...newClassDays];
   
@@ -391,9 +398,10 @@ export default function ServiceNewEditForm({ currentService }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [values.availability_days]);
 
+
   const handleRemoveSession = (day: string, sessionIndex: number) => {
     const updatedAvailability = (values.availability?.classes as unknown as any[])?.map((item) => {
-      if (item.day === day) {
+      if (item.day.slice(0, 3) === day) {
         item.sessions.splice(sessionIndex, 1);
       }
       return item;
@@ -403,12 +411,12 @@ export default function ServiceNewEditForm({ currentService }: Props) {
   };
 
   useEffect(() => {
-    if (values.type === 'Class') {
+    if (values.type === 'class') {
       setValue('availability', { days: [], classes: (currentService?.availability?.classes || [] as any) });
-      setValue('availability_days', ((currentService?.availability?.classes as unknown as any) || [])?.map((item: any) => item.day) || [])
+      setValue('availability_days', ((currentService?.availability?.classes as unknown as any) || [])?.map((item: any) => item.day.slice(0,3)) || [])
     } else {
       setValue('availability', { days: currentService?.availability?.days || [], classes: [] as any });
-      setValue('availability_days', currentService?.availability?.days.map((item) => item.day) || [])
+      setValue('availability_days', currentService?.availability?.days.map((item) => item.day.slice(0,3)) || [])
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -416,24 +424,23 @@ export default function ServiceNewEditForm({ currentService }: Props) {
 
   // Add this function to handle class sessions display and editing
   const handleClassSessions = useCallback(() => {
-    if (currentService?.availability?.classes && values.type === 'Class') {
+    if (currentService?.availability?.classes && values.type === 'class') {
       // Map the classes from the API to the format expected by the form
       const classData = currentService.availability.classes.map(classItem => ({
-        day: classItem.day,
+        day: classItem.day.slice(0, 3),
         sessions: classItem.sessions.map(session => ({
           from: session.from,
           to: session.to
         }))
       }));
       
-      // Set the class data in the form
+      // Set the class data in the form      
       setValue('availability.classes', classData);
       
       // Make sure the days are selected in availability_days
       const classDays = classData.map(item => item.day);
       setValue('availability_days', classDays);
       
-      console.log('Initialized class sessions:', classData);
     }
   }, [currentService, setValue, values.type]);
 
@@ -463,9 +470,9 @@ export default function ServiceNewEditForm({ currentService }: Props) {
                 value={values.category}
                 onChange={(event) => setValue('category', event.target.value)}
               >
-                <MenuItem value={0}>Gym Sessions</MenuItem>
-                <MenuItem value={1}>Yoga Class</MenuItem>
-                <MenuItem value={2}>Padl FlowUp</MenuItem>
+                {categories.length > 0 && categories.map((category: any) => (
+                  <MenuItem key={category._id} value={category?.name}>{category?.name}</MenuItem>
+                ))}
               </Select>
               </FormControl>
 
@@ -483,6 +490,10 @@ export default function ServiceNewEditForm({ currentService }: Props) {
       </Grid>
   );
 
+
+  console.log(categories);
+  
+
   const renderProperties = (
     <Grid xs={12} md={12}>
         <Card>
@@ -495,13 +506,13 @@ export default function ServiceNewEditForm({ currentService }: Props) {
                 <Box gap={2} display="grid" gridTemplateColumns="repeat(2, 1fr)">
                   {[
                     {
-                      label: 'Session',
+                      label: 'session',
                       icon: <Iconify icon="solar:clock-circle-bold" width={32} sx={{ mb: 2 }} />,
                       description: 'Book individual sessions with flexible availability',
                       details: 'Set daily time slots and credits'
                     },
                     {
-                      label: 'Class',
+                      label: 'class',
                       icon: <Iconify icon="solar:calendar-date-bold" width={32} sx={{ mb: 2 }} />,
                       description: 'Schedule recurring group classes',
                       details: 'Set class schedule and capacity'
@@ -532,13 +543,14 @@ export default function ServiceNewEditForm({ currentService }: Props) {
             />
           </Stack>
 
-          {values.type === 'Session' ? (
+          {values.type === 'session' ? (
             <Stack spacing={3} sx={{ p: 3 }}>
               <Stack spacing={1}>
                 <Typography variant="subtitle2">Availability</Typography>
                 <RHFMultiCheckbox
                   name="availability_days"
                   options={WEEKDAY_OPTIONS}
+                  // selected={values.availability_days}
                   sx={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -558,19 +570,21 @@ export default function ServiceNewEditForm({ currentService }: Props) {
                           md: '1fr 2fr 2fr',
                        }}>
                   <Typography sx={{ mr: 5 }} variant="subtitle2">
-                    {getDayName(day.day as 'Sun' | 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat')}
+                    {day.day}
                   </Typography>
                   <TimePicker
                     ampm={false} 
-                    onChange={(value) => handleChangeTime(day.day, 0, 'from', value || new Date())}
-                    value={day.from ? dayjs(`0000 ${day.from}`, 'HH:mm').toDate() : null} 
+                    onChange={(newValue) => handleChangeSessionTime(day.day, 'from', newValue!)}
+                    value={day.from ? dayjs(`0000 ${day.from}`, 'HH:mm').toDate() : null}
                     label="From" 
                   />
                   <TimePicker
                     ampm={false}
-                    value={day.from ? dayjs(`0000 ${day.to}`, 'HH:mm').toDate() : null} 
-                    onChange={(value) => handleChangeTime(day.day, 0, 'to', value || new Date())}
+                    value={day.to ? dayjs(`0000 ${day.to}`, 'HH:mm').toDate() : null}
+                    // onChange={(value) => handleChangeTime(day.day, 0, 'to', value || new Date())}
                     label="To" 
+                    onChange={(newValue) => handleChangeSessionTime(day.day, 'to', newValue!)}
+
                   />
                 </Box>
               ))}
@@ -627,6 +641,7 @@ export default function ServiceNewEditForm({ currentService }: Props) {
               <RHFMultiCheckbox
                   name="availability_days"
                   options={WEEKDAY_OPTIONS}
+                  selectedDays={values.availability_days}
                   sx={{
                     display: 'flex',
                     flexDirection: 'row',
@@ -634,13 +649,13 @@ export default function ServiceNewEditForm({ currentService }: Props) {
                   }}
                 />
 
-              {values.type === 'Class' && (
+              {values.type === 'class' && (
                 <Stack spacing={3} sx={{ pt: 3 }}>
                   <Typography variant="subtitle1">Class Sessions</Typography>
                   
                   {values.availability_days.map(day => {
                     // Find the class data for this day
-                    const classData = (values.availability.classes ?? []).find(c => c.day === day);
+                    const classData = (values.availability.classes || []).find(c => c.day === day);
                     
                     return (
                       <Stack spacing={2} key={day}>
@@ -696,7 +711,7 @@ export default function ServiceNewEditForm({ currentService }: Props) {
         </Card>
 
         <Card sx={{ mt: 3 }}>
-          <CardHeader title="Price" />      
+          <CardHeader title="Credits" />      
           <Stack spacing={3} sx={{ p: 3 }}>
             <Stack spacing={1}>
               <Box
@@ -711,22 +726,12 @@ export default function ServiceNewEditForm({ currentService }: Props) {
                   type='number'
                   name="credit" 
                   label="Credits" 
-                  value={values.credit} 
+                  value={values.credit || ''} 
                   onChange={(event) => {
                     setValue('credit', Number(event.target.value));
-                    setValue('price', Number(event.target.value) * 3);
                   }}  
                 />
                 <Typography variant="subtitle2">Credits</Typography>
-                <Typography variant="h4">=</Typography>
-                <RHFTextField
-                  type='number'
-                  name="price" 
-                  label="Price" 
-                  value={values.price} 
-                  onChange={() => {}} 
-                />
-                <Typography variant="subtitle2">JOD</Typography>
               </Box>
             </Stack>
           </Stack>

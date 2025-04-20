@@ -52,8 +52,9 @@ export default function SoonAlert({
       <Box
         
       >
-        {items?.map((item) => (
+        {items?.map((item, index) => (
           <Box
+            key={item.id || index} // Use a unique identifier or fallback to index
             sx={{
               display: 'flex',
               alignItems: 'center',

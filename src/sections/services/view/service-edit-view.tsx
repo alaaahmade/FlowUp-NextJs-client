@@ -13,7 +13,6 @@ import { useParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from 'src/redux/hooks';
 import { fetchServiceById } from 'src/redux/slices/serviceSlice';
 import { useSnackbar } from 'notistack';
-import { ListingInterface } from 'src/types/services';
 //
 import ServiceNewEditForm from '../service-new-edit-form';
 
@@ -27,6 +26,8 @@ export default function ServiceEditView() {
   const serviceState = useAppSelector((state) => state.service);
   const currentService = serviceState?.currentService ;
   const loading = serviceState?.loading || false;
+
+  
 
   useEffect(() => {
     if (id) {

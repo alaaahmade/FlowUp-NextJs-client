@@ -10,14 +10,12 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 // components
 import Scrollbar from 'src/components/scrollbar';
-import { useSettingsContext } from 'src/components/settings';
 import CustomBreadcrumbs from 'src/components/custom-breadcrumbs';
-import { TableNoData, TableHeadCustom, TableSelectedAction } from 'src/components/table';
+import { TableNoData, TableHeadCustom } from 'src/components/table';
 import { useSnackbar } from 'src/components/snackbar';
 // types
 import { IUserItem } from 'src/types/user';
 // hooks
-import { useBoolean } from 'src/hooks/use-boolean';
 // routes
 import { paths } from 'src/routes/paths';
 // sections
@@ -37,7 +35,7 @@ const TABLE_HEAD = [
 ];
 
 export default function UserListView() {
-  const settings = useSettingsContext();
+  // const settings = useSettingsContext();
   const dispatch = useAppDispatch();
   const { users = [], loading } = useAppSelector((state) => state.user);
   const { enqueueSnackbar } = useSnackbar();
@@ -55,18 +53,18 @@ export default function UserListView() {
     dispatch(fetchRoles());
   }, [dispatch]);
 
-  const handleEditRole = useCallback(
-    async (userId: number, newRole: string) => {
-      try {
-        await dispatch(updateUser({ id: userId, data: { roles: [Number(newRole)] } })).unwrap();
-        enqueueSnackbar('Role updated successfully', { variant: 'success' });
-      } catch (error) {
-        console.error(error);
-        enqueueSnackbar('Failed to update role', { variant: 'error' });
-      }
-    },
-    [dispatch, enqueueSnackbar]
-  );
+  // const handleEditRole = useCallback(
+  //   async (userId: number, newRole: string) => {
+  //     try {
+  //       await dispatch(updateUser({ id: userId, data: { roles: [Number(newRole)] } })).unwrap();
+  //       enqueueSnackbar('Role updated successfully', { variant: 'success' });
+  //     } catch (error) {
+  //       console.error(error);
+  //       enqueueSnackbar('Failed to update role', { variant: 'error' });
+  //     }
+  //   },
+  //   [dispatch, enqueueSnackbar]
+  // );
 
   const handleDeleteUser = useCallback(
     async (userId: number) => {
