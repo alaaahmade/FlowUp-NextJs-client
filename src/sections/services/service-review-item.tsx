@@ -19,8 +19,8 @@ type Props = {
 };
 
 export default function ProductReviewItem({ review }: Props) {
-  const { name, rating, comment, postedAt, avatarUrl, attachments, isPurchased } = review;
-
+  const { name, rating, comment, createdAt, attachments, isPurchased, user } = review;
+  
   const renderInfo = (
     <Stack
       spacing={2}
@@ -35,7 +35,7 @@ export default function ProductReviewItem({ review }: Props) {
       }}
     >
       <Avatar
-        src={avatarUrl}
+        src={user?.profilePicture}
         sx={{
           width: { xs: 48, md: 64 },
           height: { xs: 48, md: 64 },
@@ -43,8 +43,8 @@ export default function ProductReviewItem({ review }: Props) {
       />
 
       <ListItemText
-        primary={name}
-        secondary={fDate(postedAt)}
+        primary={user.fullName}
+        secondary={fDate(createdAt)}
         primaryTypographyProps={{
           noWrap: true,
           typography: 'subtitle2',

@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import LoadingButton from '@mui/lab/LoadingButton';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
@@ -26,7 +25,8 @@ import { useAuthContext } from 'src/auth/hooks';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
-import { Box } from '@mui/material';
+import { Icon } from '@iconify/react';
+import { StyledAuthWrapper, SubmitButton } from 'src/components/auth-components';
 
 // ----------------------------------------------------------------------
 
@@ -47,11 +47,6 @@ export default function JwtLoginView() {
     email: Yup.string().required('Email is required').email('Email must be a valid email address'),
     password: Yup.string().required('Password is required'),
   });
-
-  // const defaultValues = {
-  //   email: 'saed.dev9@gmail.com',
-  //   password: '123456789',
-  // };
 
   const methods = useForm({
     resolver: yupResolver(LoginSchema),
@@ -78,8 +73,8 @@ export default function JwtLoginView() {
 
 
   const renderHead = (
-    <Stack spacing={2} sx={{ mb: 1 , alignItems: 'center' }}>
-      <Typography variant="h5">Sign in to your account</Typography>
+    <Stack spacing={2} sx={{ alignItems: 'flex-start', mb: 4 }}>
+      <Typography variant="h5">Sign in to YOUR PASS</Typography>
 
       <Stack direction="row" spacing={0.5}>
         <Typography variant="body2">Don&apos;t have an account?</Typography>
@@ -111,7 +106,22 @@ export default function JwtLoginView() {
           ),
         }}
       />
+      <SubmitButton
+        fullWidth
+        color="inherit"
+        size="large"
+        type="submit"
+        variant="contained"
+        loading={isSubmitting}
+      >
+        Login
 
+        <InputAdornment position="end">
+          <IconButton onClick={password.onToggle} edge="end">
+            <Icon icon="eva:arrow-ios-forward-fill" width="24" height="24" color='#fff' />
+          </IconButton>
+        </InputAdornment>
+      </SubmitButton>
       <Link
         component={RouterLink}
         href={paths.auth.jwt.forgotPassword}
@@ -122,38 +132,23 @@ export default function JwtLoginView() {
       >
         Forgot password?
       </Link>
-
-
-      <LoadingButton
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        loading={isSubmitting}
-        sx={{
-          backgroundColor: '#00A76F'
-        }}
-      >
-        Login
-      </LoadingButton>
     </Stack>
   );
 
   return (
-    <Box sx={{ backgroundColor: 'background.default', p: 2, borderRadius: 2,
-      width: '100%', // Default width for smaller screens
-      maxWidth: '420px', // Max width for larger screens
-      '@media (min-width: 1024px)': {
-        width: '420px', // Set width to 420px on larger screens (computers)
-      },
-    }}>
+    <StyledAuthWrapper
+      sx={{
+        p: 4 
+      }}
+    >
 
-    <FormProvider methods={methods} onSubmit={onSubmit}>
+    <FormProvider
+    
+    methods={methods} onSubmit={onSubmit}>
       {renderHead}
 
 
       {renderForm}
-    </FormProvider></Box>
+    </FormProvider></StyledAuthWrapper>
   );
 }

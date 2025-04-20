@@ -84,7 +84,7 @@ export default function PostDetailsPreview({
                 {description}
               </Typography>
 
-              <Markdown children={content} />
+              <Markdown>{content}</Markdown>
             </Stack>
           </Container>
         </Scrollbar>

@@ -5,14 +5,13 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import LoadingButton from '@mui/lab/LoadingButton';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import InputAdornment from '@mui/material/InputAdornment';
-import {   Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 // routes
@@ -28,6 +27,8 @@ import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
 import { DatePicker } from '@mui/x-date-pickers'
 import { fBerthDate } from 'src/utils/format-time';
+import { Icon } from '@iconify/react';
+import { StyledAuthWrapper, SubmitButton } from 'src/components/auth-components';
 
 // ----------------------------------------------------------------------
 
@@ -89,8 +90,8 @@ export default function JwtRegisterView() {
 
 
   const renderHead = (
-    <Stack spacing={1} sx={{ mb: 0, p: 0 , alignItems: 'center'}}>
-      <Typography variant="h5">Get started with your account</Typography>
+    <Stack spacing={1} sx={{ mb: 0, p: 0 , alignItems: 'flex-start'}}>
+      <Typography variant="h5">Get started with YOUR PASS</Typography>
 
       <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
         <Typography variant="body2">Already have an account?</Typography>
@@ -156,6 +157,7 @@ export default function JwtRegisterView() {
         <DatePicker
           label="Date of Birth"
           name="dateOfBirth"
+          maxDate={new Date('2007-01-01')}
           onChange={(newValue) => setValue('dateOfBirth', fBerthDate(newValue))}
       sx={{
         width: '50%'
@@ -179,37 +181,39 @@ export default function JwtRegisterView() {
           }}
         />
 
-        <LoadingButton
+        <SubmitButton
           fullWidth
           color="inherit"
           size="large"
           type="submit"
           variant="contained"
           loading={isSubmitting}
-          sx={{
-            backgroundColor: '#00A76F'
-          }}
         >
           Create account
-        </LoadingButton>
+
+
+          <InputAdornment position="end">
+            <IconButton onClick={password.onToggle} edge="end">
+              <Icon icon="eva:arrow-ios-forward-fill" width="24" height="24" color='#fff' />
+            </IconButton>
+          </InputAdornment>
+        </SubmitButton>
 
       </Stack>
     </FormProvider>
   );
 
   return (
-    <Box sx={{ backgroundColor: 'background.default', p: 2, borderRadius: 2,
-      width: '100%', // Default width for smaller screens
-      maxWidth: '420px', // Max width for larger screens
-      '@media (min-width: 1024px)': {
-        width: '420px', // Set width to 420px on larger screens (computers)
-      },
-    }}>
+    <StyledAuthWrapper
+    sx={{
+      p: 4 
+    }}
+  >
       {renderHead}
 
       {renderForm}
 
       {renderTerms}
-    </Box>
+    </StyledAuthWrapper>
   );
 }

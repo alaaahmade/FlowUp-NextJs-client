@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   frontend:
-    image: ${DOCKERHUB_USERNAME:?DOCKERHUB_USERNAME is required}/FlowUp-frontend:${DOCKER_TAG:-latest}
+    image: ${DOCKERHUB_USERNAME:?DOCKERHUB_USERNAME is required}/arena-frontend:${DOCKER_TAG:-latest}
     build:
       context: .
       dockerfile: staging.Dockerfile
@@ -51,5 +51,5 @@ services:
 
 networks:
   default:
-    name: FlowUp-frontend-staging
+    name: arena-frontend-staging
     driver: bridge

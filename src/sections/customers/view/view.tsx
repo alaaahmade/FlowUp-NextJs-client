@@ -8,7 +8,6 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
-import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
@@ -24,7 +23,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
-import { ConfirmDialog } from 'src/components/custom-dialog';
+import { ConfirmDialog, ProfileDialog } from 'src/components/custom-dialog';
 import { useSettingsContext } from 'src/components/settings';
 import {
   useTable,
@@ -37,14 +36,16 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 // types
-import { IUserItem, IUserTableFilters, IUserTableFilterValue } from 'src/types/user';
+import { IUserItem, IUserTableFilterValue } from 'src/types/user';
 //
 import { Typography } from '@mui/material';
-import { gitCustomers, setCustomer } from 'src/redux/slices/customerSignSlice';
+import { deleteCustomer, fetchCustomers, gitCustomers, setCustomer } from 'src/redux/slices/customerSignSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { LoadingButton } from '@mui/lab';
 import UserTableRow from '../customer-table-row';
 import UserTableToolbar from '../customer-table-toolbar';
 import UserTableFiltersResult from '../customer-table-filters-result';
+import { useAppDispatch } from '@/redux/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -54,14 +55,11 @@ const STATUS_OPTIONS = [
   { value: 'Banned', label: 'Banned' },
 ];
 
-const TABLE_HEAD = [
+const TABLE_HEAD = [ 
+  { id: 'name', label: 'Name', width:800 },
+  { id: 'phoneNumber', label: 'Phone Number', width:500 },
+  { id: 'status', label: 'Status', width:100},
   { id: '', width: 50 },
-  { id: 'name', label: 'Name', width: 5000 },
-  { id: 'phoneNumber', label: 'Phone Number', flex: 2 },
-  { id: '', width: 88 },
-  { id: '', flex: 1 },
-  { id: 'status', label: 'Status', flex: 1 },
-  { id: '', width: 88 },
 ];
 
 const defaultFilters: {
@@ -82,11 +80,11 @@ export default function CustomersListView() {
   const router = useRouter();
 
   const confirm = useBoolean();
-
+  const loading = useBoolean();
+  const [profile, setProfile] = useState(null)
+  const open = useBoolean();
   const customers = useSelector((state: any) => state.signDialog.customers);
-  const dispatch = useDispatch();
-
-  // const [tableData, setTableData] = useState([]);
+  const dispatch = useAppDispatch();
 
   const [filters, setFilters] = useState(defaultFilters);
 
@@ -95,6 +93,7 @@ export default function CustomersListView() {
     comparator: getComparator(table.order, table.orderBy),
     filters,
   });
+  
 
   const dataInPage = dataFiltered.slice(
     table.page * table.rowsPerPage,
@@ -119,13 +118,17 @@ export default function CustomersListView() {
   );
 
   const handleDeleteRow = useCallback(
-    (id: string) => {
-      const updatedCustomers = customers.filter((row: { id: string;}) => row.id !== id);
+    async (id: string) => {      
+      loading.onTrue();
+      const updatedCustomers = customers.filter((row: { id: string;}) => String(row.id) !== String(id));
+      await deleteCustomer(id);
       dispatch(setCustomer({ customers: updatedCustomers }));
       table.onUpdatePageDeleteRow(dataInPage.length);
+      loading.onFalse();
+      // confirm.onTrue();
     },
     [customers, dispatch, dataInPage.length, table]
-  );
+  );  
 
 
   const handleEditRow = useCallback(
@@ -137,8 +140,6 @@ export default function CustomersListView() {
 
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
-      // console.log(newValue, 11111);
-      
       handleFilters('status', newValue);
     },
     [handleFilters]
@@ -150,32 +151,16 @@ export default function CustomersListView() {
 
   useEffect(() => {
     async function fetchData() {
-      const customersData = await gitCustomers();
-      
-      dispatch(setCustomer({
-        customers: customersData.map((user: {
-          id: string;
-          fullName: string;
-          picture: string;
-          phoneNumber: string;
-          email: string;
-          active: boolean; }) => ({
-          id: user.id || '',
-          name: user.fullName || '',
-          avatarUrl: user.picture || '',
-          phoneNumber: user.phoneNumber || '+1234567890123',
-          email: user.email || '',
-          status: user.active === true ? 'active' : 'banned',
-        })),
-      }));
+       const data = await dispatch(fetchCustomers())
+       console.log(data);
+       
+
     }
-
-
-    // Call the async function
     fetchData();
     
-  }, [dispatch]);
-  console.log(customers);
+  }, [dispatch]);  
+  console.log({customers}, 'customersData');
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>
@@ -204,9 +189,9 @@ export default function CustomersListView() {
                       ((tab.value === 'all' || tab.value === filters.status) && 'filled') || 'soft'
                     }
                     color={
-                      (tab.value === 'active' && 'success') ||
+                      (tab.value === 'Active' && 'success') ||
                       (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
+                      (tab.value === 'Banned' && 'error') ||
                       (tab.value === 'all' && 'wGray') ||
                       'default'
                     }
@@ -252,7 +237,7 @@ export default function CustomersListView() {
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  customers.map((row: { id: string;}) => row.id)
+                  customers.map((row: { id: string;}) => String(row.id))
                 )
               }
               action={
@@ -276,7 +261,7 @@ export default function CustomersListView() {
                   onSelectAllRows={(checked) =>
                     table.onSelectAllRows(
                       checked,
-                      customers.map((row: { id: string;}) => row.id)
+                      customers.map((row: { id: string;}) => String(row.id))
                     )
                   }
                 />
@@ -295,6 +280,11 @@ export default function CustomersListView() {
                         onSelectRow={() => table.onSelectRow(String(row.id))}
                         onDeleteRow={() => handleDeleteRow(String(row.id))}
                         onEditRow={() => handleEditRow(String(row.id))}
+                        loading={loading.value}
+                        onClickRow={() => {
+                          setProfile(row)
+                          open.onTrue()
+                        }}
                       />
                     ))}
 
@@ -332,17 +322,29 @@ export default function CustomersListView() {
           </>
         }
         action={
-          <Button
+          <LoadingButton
+            loading={loading.value}
             variant="contained"
             color="error"
             onClick={() => {
+              
+              table.selected.map((id: string) => {
+                handleDeleteRow(id);
+              });
+              
               confirm.onFalse();
+              window.location.reload();
+
             }}
           >
             Delete
-          </Button>
+          </LoadingButton>
         }
       />
+      <ProfileDialog open={open.value} user={profile} onClose={() =>{
+        open.onFalse()
+         setProfile(null)
+      }} />
     </>
   );
 }
@@ -380,8 +382,7 @@ function applyFilter({
   }
 
   if (status !== 'all') {
-    inputData = inputData.filter((user: IUserItem) => (user.status ? 'Active' : 'Banned') === status);
-    console.log(inputData, status);
+    inputData = inputData.filter((user: IUserItem) => (user.status?.toLocaleLowerCase()) === status.toLocaleLowerCase());
     
   }
 

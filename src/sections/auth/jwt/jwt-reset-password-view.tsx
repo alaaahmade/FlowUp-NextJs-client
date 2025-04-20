@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
-import LoadingButton from '@mui/lab/LoadingButton';
 import Link from '@mui/material/Link';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
@@ -22,6 +21,8 @@ import { useSearchParams } from 'next/navigation';
 // components
 import Iconify from 'src/components/iconify';
 import FormProvider, { RHFTextField } from 'src/components/hook-form';
+import { Icon } from '@iconify/react';
+import { StyledAuthWrapper, SubmitButton } from 'src/components/auth-components';
 
 // ----------------------------------------------------------------------
 
@@ -115,15 +116,21 @@ export default function JwtResetPasswordView() {
         }}
       />
 
-      <LoadingButton
+      <SubmitButton
         fullWidth
         size="large"
         type="submit"
         variant="contained"
         loading={isSubmitting}
+
       >
         Reset Password
-      </LoadingButton>
+        <InputAdornment position="end">
+          <IconButton onClick={password.onToggle} edge="end">
+            <Icon icon="eva:arrow-ios-forward-fill" width="24" height="24" color='#fff' />
+          </IconButton>
+        </InputAdornment>
+      </SubmitButton>
 
       <Link
         component={RouterLink}
@@ -133,6 +140,7 @@ export default function JwtResetPasswordView() {
         sx={{
           alignItems: 'center',
           display: 'inline-flex',
+          alignSelf: 'flex-end',
         }}
       >
         Return to sign in
@@ -141,9 +149,15 @@ export default function JwtResetPasswordView() {
   );
 
   return (
+        <StyledAuthWrapper
+        sx={{
+          p: 4 
+        }}
+      >
     <FormProvider methods={methods} onSubmit={onSubmit}>
       {renderHead}
       {renderForm}
     </FormProvider>
+    </StyledAuthWrapper>
   );
 }

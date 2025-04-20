@@ -46,6 +46,7 @@ interface RHFMultiCheckboxProps extends Omit<FormControlLabelProps, 'control' | 
   label?: string;
   spacing?: number;
   helperText?: React.ReactNode;
+  selectedDays?: string[];
 }
 
 export function RHFMultiCheckbox({
@@ -53,6 +54,7 @@ export function RHFMultiCheckbox({
   name,
   label,
   options,
+  selectedDays,
   spacing,
   helperText,
   sx,

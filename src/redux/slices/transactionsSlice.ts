@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios from 'src/utils/axios';
 import { _transactions } from 'src/_mock/_transactions';
 import { HOST_API } from 'src/config-global';
 

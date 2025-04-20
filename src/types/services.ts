@@ -49,10 +49,16 @@ export type IServicesReview = {
   rating: number;
   comment: string;
   helpful: number;
-  avatarUrl: string;
   isPurchased: boolean;
   attachments?: string[];
-  postedAt: Date;
+  createdAt: Date;
+  user : {
+    id: string;
+    fullName: string;
+    email: string;
+    phone: string;
+    profilePicture: string;
+  }
 };
 
 

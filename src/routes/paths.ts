@@ -64,6 +64,13 @@ export const paths = {
     },
     customers: '/dashboard/customers',
     transactions: '/dashboard/transactions',
+    subscription: {
+      root: '/dashboard/subscription',
+      plans: '/dashboard/subscription/plans',
+    },
+    advertisements: '/dashboard/advertisements',
+    categories: '/dashboard/categories',
+    interests: '/dashboard/interests',
     service: {
       root: '/dashboard/services',
       list: '/dashboard/services/list',

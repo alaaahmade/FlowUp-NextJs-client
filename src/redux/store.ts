@@ -11,7 +11,11 @@ import userReducer from './slices/userSlice';
 import signDialogSlice  from './slices/customerSignSlice';
 import NotificationsSlice from './slices/notificationSlice';
 import TransactionsSlice from './slices/transactionsSlice';
-// import themeReducer from './slices/themeSlice';
+import SubscriptionsSlice from './slices/subscriptionsSlice';
+import AdvertisementsSlice from './slices/AdsSlice';
+import CategoriesSlice from './slices/CategoriesSlice';
+import InterestsSlice from './slices/InterestsSlice';
+import PlansSlice from './slices/PlanSlice';
 
 // ----------------------------------------------------------------------
 
@@ -22,18 +26,19 @@ export type AppDispatch = typeof store.dispatch;
 
 const store = configureStore({
   reducer: {
-    // ...persistReducer(rootPersistConfig, rootReducer),
     service: serviceReducer,
-    // auth: authReducer,
-    // user: userReducer,
     business: businessReducer,
     role: roleReducer,
     permission: permissionReducer,
     user: userReducer,
     signDialog: signDialogSlice,
     NotificationsSlice,
-    TransactionsSlice
-
+    TransactionsSlice,
+    SubscriptionsSlice,
+    AdvertisementsSlice,
+    CategoriesSlice,
+    InterestsSlice,
+    PlansSlice
     // theme: themeReducer,
   },
   middleware: (getDefaultMiddleware) =>

@@ -1,8 +1,8 @@
-# 🏰 FlowUp Frontend - Sprint Overview
+# 🏰 Arena Frontend - Sprint Overview
 
 ## 📌 Project Description
 
-FlowUp's frontend is built using **Next.js**, providing a fast, scalable, and SEO-friendly interface for users. This sprint focuses on **setting up the project structure, implementing authentication pages, and automating CI/CD** to ensure a smooth development workflow.
+Arena's frontend is built using **Next.js**, providing a fast, scalable, and SEO-friendly interface for users. This sprint focuses on **setting up the project structure, implementing authentication pages, and automating CI/CD** to ensure a smooth development workflow.
 
 ---
 
@@ -24,13 +24,13 @@ FlowUp's frontend is built using **Next.js**, providing a fast, scalable, and SE
 
 ## 🌜 Frontend Routes
 
-📌 **Base URL:** `https://FlowUp.com`  
+📌 **Base URL:** `https://arena.com`  
 📌 **Authentication Pages:**  
 | Route | Description | Protected |
 |----------------------|----------------------------------|------------|
-| `/login` | User login page | ✅ Yes |
-| `/register` | User registration page | ✅ Yes |
-| `/forgot-password` | Password reset request page | ✅ Yes |
+| `/login` | User login page | ❌ No |
+| `/register` | User registration page | ❌ No |
+| `/forgot-password` | Password reset request page | ❌ No |
 | `/dashboard` | User dashboard | ✅ Yes |
 | `/profile` | User profile settings | ✅ Yes |
 
@@ -51,8 +51,8 @@ FlowUp's frontend is built using **Next.js**, providing a fast, scalable, and SE
 ### **1️⃣ Clone the Repository**
 
 ```bash
-git clone https://github.com/your-repo/FlowUp-frontend.git
-cd FlowUp-frontend
+git clone https://github.com/your-repo/arena-frontend.git
+cd arena-frontend
 ```
 
 ### **2️⃣ Set Up Environment Variables**
@@ -60,7 +60,7 @@ cd FlowUp-frontend
 Create a `.env.local` file and configure API settings:
 
 ```ini
-NEXT_PUBLIC_API_URL=https://api.FlowUp.com
+NEXT_PUBLIC_API_URL=https://api.arena.com
 NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
 NEXT_PUBLIC_APPLE_CLIENT_ID=your-apple-client-id
 ```
@@ -88,15 +88,3 @@ By the end of this sprint, the frontend will have:
 👉 **A scalable and optimized frontend ready for production**
 
 Stay tuned for further updates! 💡🔥
-
-### Deploy in one click
-
-1. Fork this repo.
-1. In your new repo, click the button below.
-
-<a href="https://render.com/deploy" referrerpolicy="no-referrer-when-downgrade" rel="nofollow">
-  <img src="https://render.com/images/deploy-to-render-button.svg" alt="Deploy to Render" />
-</a>
-
-Note: The button uses the `render.yaml` file in this repo to deploy your app. For more information about `render.yaml`, see [Render's guide](https://docs.render.com/infrastructure-as-code).
-

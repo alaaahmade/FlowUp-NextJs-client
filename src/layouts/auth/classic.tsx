@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack';
 // theme
 // components
 import Logo from 'src/components/logo';
+import { Grid, Typography } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -17,13 +18,15 @@ type Props = {
 };
 
 export default function AuthClassicLayout({ children, image, title }: Props) {
+  const theme = useTheme();
 
   const renderLogo = (
     <Logo
       sx={{
         zIndex: 9,
         position: 'absolute',
-        m: { xs: 1.5, md: 2},
+        m: { xs: 1.5, md: 4},
+
       }}
     />
   );
@@ -31,25 +34,40 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
     <Box
       sx={{
         position: 'absolute',
-        right: 0,
+        left: '3em',
+        bottom: '1em',
         zIndex: 9,
-        m: { xs: 1.5, md: 2},
+        // m: { xs: 1.5, md: 3},
         p: 0.5,
-        fontWeight: '600',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 1
       }}
-    >Need help ? </Box>)
+    >
+      Having an issue? 
+      <span 
+        style={{
+          color: theme.palette.primary.main,
+          cursor: 'pointer',
+          fontWeight: '600',
+
+        }}
+      >Contact support </span></Box>)
 
   const renderContent = (
     <Stack
       sx={{
-        width: 1,
-        mx: 'auto',
-        maxWidth: 480,
-        px: { xs: 2, md: 8 },
+        width: '100%',
+        // maxWidth: 480,
+        // px: { xs: 2, md: 8 },
         // py: { xs: 15, md: 30 },
+        p: 0,
+        m: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        flexDirection: 'column',
       }}
     >
       {children}
@@ -60,30 +78,61 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
 
   return (
     <Stack
-      direction="row"
+      direction="column"
       sx={{
         width: "100vw",
         maxWidth: "100vw",
         minHeight: "100vh",
-        backgroundImage: 'url("/assets/background/sign_up (1).png")',
-        backgroundSize: "cover", 
-        backgroundPosition: "top center", 
-        backgroundRepeat: "no-repeat",
-        backgroundColor: "#000", 
-
-        "@media (max-width: 768px)": {
-          backgroundSize: "cover", 
-          backgroundPosition: "top", 
-        },
-
-
+        p: 0,
+        m: 0,
+        boxSizing: "border-box",
       }}
     >
-      {renderLogo}
-      {helpSupport}
 
+      <Grid 
+        container 
+        spacing={0} 
+        sx={{ flexGrow: 1, height: "100vh", 
+          p: 0,
+          m: 0,
+          boxSizing: "border-box",
+         }}
+      >
 
+        <Grid item xs={12} md={4}
+          sx={{
+            position: "relative",
+          }}
+        >
+         {renderLogo}
       {renderContent}
+      {helpSupport}
+        </Grid>
+        <Grid item xs={12} md={8} spacing={0} sx={{}}>
+          <Box
+            sx={{
+              // backgroundColor: "lightcoral",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundImage: 'url("/assets/background/sign_up (1).png")',
+              backgroundSize: "contain",
+              backgroundPosition: "top center", 
+              backgroundRepeat: "no-repeat",
+              backgroundColor: "#fff",
+      
+              "@media (max-width: 768px)": {
+                backgroundSize: "cover", 
+                backgroundPosition: "top", 
+              },
+            }}
+           />
+        </Grid>
+
+      </Grid>
+
+
     </Stack>
   );
 }
