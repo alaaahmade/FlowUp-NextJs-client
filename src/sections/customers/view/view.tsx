@@ -39,12 +39,13 @@ import {
 import { IUserItem, IUserTableFilterValue } from 'src/types/user';
 //
 import { Typography } from '@mui/material';
-import { deleteCustomer, gitCustomers, setCustomer } from 'src/redux/slices/customerSignSlice';
+import { deleteCustomer, fetchCustomers, gitCustomers, setCustomer } from 'src/redux/slices/customerSignSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoadingButton } from '@mui/lab';
 import UserTableRow from '../customer-table-row';
 import UserTableToolbar from '../customer-table-toolbar';
 import UserTableFiltersResult from '../customer-table-filters-result';
+import { useAppDispatch } from '@/redux/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -83,7 +84,7 @@ export default function CustomersListView() {
   const [profile, setProfile] = useState(null)
   const open = useBoolean();
   const customers = useSelector((state: any) => state.signDialog.customers);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [filters, setFilters] = useState(defaultFilters);
 
@@ -150,39 +151,16 @@ export default function CustomersListView() {
 
   useEffect(() => {
     async function fetchData() {
-      const customersData = await gitCustomers();            
-      dispatch(setCustomer({
-        customers: customersData.map((user: {
-          credits: number;
-          interests: any;
-          bookings: any;
-          roles: any;
-          dateOfBirth: string;
-          createdAt: string;
-          id: string;
-          fullName: string;
-          profilePicture: string;
-          phoneNumber: string;
-          email: string;
-          status: boolean; }) => ({
-          id: user.id || '',
-          name: user.fullName || '',
-          avatarUrl: user.profilePicture || '',
-          phoneNumber: user.phoneNumber || '+1234567890123',
-          email: user.email || '',
-          status: user.status ,
-          createdAt: user.createdAt,
-          dateOfBirth: user.dateOfBirth || '',
-          role: user.roles[0].name,
-          bookings: user.bookings,
-          interests: user.interests,
-          credits: user.credits || 0,
-        })),
-      }));
+       const data = await dispatch(fetchCustomers())
+       console.log(data);
+       
+
     }
     fetchData();
     
   }, [dispatch]);  
+  console.log({customers}, 'customersData');
+
   return (
     <>
       <Container maxWidth={settings.themeStretch ? false : 'lg'}>

@@ -17,7 +17,7 @@ export const StyledAuthWrapper = styled(Box)(({ theme }) => ({
 }))
 
 export const SubmitButton = styled(LoadingButton)(({ theme }) => ({
-  backgroundColor: '#00A919',
+  backgroundColor: theme.palette.primary.main,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',

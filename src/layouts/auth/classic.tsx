@@ -18,6 +18,7 @@ type Props = {
 };
 
 export default function AuthClassicLayout({ children, image, title }: Props) {
+  const theme = useTheme();
 
   const renderLogo = (
     <Logo
@@ -47,7 +48,7 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
       Having an issue? 
       <span 
         style={{
-          color: '#00A919',
+          color: theme.palette.primary.main,
           cursor: 'pointer',
           fontWeight: '600',
 
@@ -115,11 +116,11 @@ export default function AuthClassicLayout({ children, image, title }: Props) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              backgroundImage: 'url("/assets/background/sign_up.png")',
-              backgroundSize: "cover",
+              backgroundImage: 'url("/assets/background/sign_up (1).png")',
+              backgroundSize: "contain",
               backgroundPosition: "top center", 
               backgroundRepeat: "no-repeat",
-              backgroundColor: "#000", 
+              backgroundColor: "#fff",
       
               "@media (max-width: 768px)": {
                 backgroundSize: "cover", 
