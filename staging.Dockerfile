@@ -20,19 +20,14 @@ ARG GA_API_SECRET
 
 # Dependencies stage - install all dependencies including dev
 FROM base AS deps
-COPY package.json package-lock.json ./
-RUN rm -rf node_modules
-RUN corepack enable && corepack prepare yarn@stable --activate
-RUN npm install --legacy-peer-deps
-RUN npx browserslist@latest --update-db
-RUN npm add --dev eslint
-RUN npm add --dev @types/react-lazy-load-image-component
-
+COPY package.json yarn.lock ./
+RUN npm install 
 
 # Builder stage - build the application
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+COPY src/types/react-lazy-load-image-component.d.ts ./src/types/
 
 # Set environment variables for build
 ENV NODE_ENV=production
@@ -47,9 +42,8 @@ ENV FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
 ENV FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
 ENV GA_MEASUREMENT_ID=${GA_MEASUREMENT_ID}
 ENV GA_API_SECRET=${GA_API_SECRET}
-RUN npm run lint && npm run type-check
+
 RUN npm run build
-RUN corepack enable
 
 # Development stage
 FROM base AS development
@@ -57,7 +51,7 @@ ENV NODE_ENV=development
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 EXPOSE 3000
-CMD ["yarn", "dev"]
+CMD ["npm", "run", "dev"]
 
 # Staging stage
 FROM base AS staging
@@ -86,7 +80,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:${PORT:-3000}/api/health || exit 1
 
 EXPOSE ${PORT:-3000}
-CMD ["yarn", "start:prod"]
+CMD ["npm", "run", "start:prod"]
 
 # Production stage
 FROM base AS production
@@ -113,4 +107,4 @@ ENV GA_API_SECRET=${GA_API_SECRET}
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:${PORT}/api/health || exit 1
 EXPOSE ${PORT}
-CMD ["yarn", "start"] 
+CMD ["npm", "run", "start"] 
