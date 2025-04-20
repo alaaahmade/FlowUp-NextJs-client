@@ -1,3 +1,5 @@
+"use client";
+
 import { m } from 'framer-motion';
 // @mui
 import { alpha } from '@mui/material/styles';
@@ -37,8 +39,13 @@ export default function SplashScreen({ sx, ...other }: BoxProps) {
             repeatDelay: 1,
             repeat: Infinity,
           }}
+          style={{ 
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+           }}
         >
-          <Logo disabledLink sx={{ width: 64, height: 64 }} />
+          <Logo disabledLink sx={{ width: '35%', height: '35%' }} />
         </m.div>
 
         <Box

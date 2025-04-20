@@ -9,11 +9,11 @@ import { UploadProps } from './types';
 
 // ----------------------------------------------------------------------
 
-export default function UploadBox({ placeholder, error, disabled, sx, ...other }: UploadProps) {
+export default function UploadBox({ placeholder, error, disabled, preview, sx, ...other }: UploadProps) {
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     disabled,
     ...other,
-  });
+  });  
 
   const hasError = isDragReject || error;
 
@@ -32,6 +32,8 @@ export default function UploadBox({ placeholder, error, disabled, sx, ...other }
         color: 'text.disabled',
         justifyContent: 'center',
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.08),
+        background: `url(${preview})`,
+        backgroundSize: 'cover',
         border: (theme) => `dashed 1px ${alpha(theme.palette.grey[500], 0.16)}`,
         ...(isDragActive && {
           opacity: 0.72,
@@ -52,8 +54,16 @@ export default function UploadBox({ placeholder, error, disabled, sx, ...other }
       }}
     >
       <input {...getInputProps()} />
-
-      {placeholder || <Iconify icon="eva:cloud-upload-fill" width={28} />}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',justifyContent: 'center',
+          flexDirection: 'column',
+        }}
+      >
+      <Iconify icon="eva:cloud-upload-fill" width={28} />
+      {placeholder }
+      </Box>
     </Box>
   );
 }
