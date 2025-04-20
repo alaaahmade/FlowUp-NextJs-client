@@ -28,9 +28,9 @@ FlowUp's frontend is built using **Next.js**, providing a fast, scalable, and SE
 📌 **Authentication Pages:**  
 | Route | Description | Protected |
 |----------------------|----------------------------------|------------|
-| `/login` | User login page | ❌ No |
-| `/register` | User registration page | ❌ No |
-| `/forgot-password` | Password reset request page | ❌ No |
+| `/login` | User login page | ✅ Yes |
+| `/register` | User registration page | ✅ Yes |
+| `/forgot-password` | Password reset request page | ✅ Yes |
 | `/dashboard` | User dashboard | ✅ Yes |
 | `/profile` | User profile settings | ✅ Yes |
 
