@@ -59,7 +59,7 @@ export default function UserTableRow({
           <Checkbox checked={selected} onClick={() => onSelectRow(row.id.toString())} />
         </TableCell>
 
-        <TableCell>{`${row.firstName} ${row.lastName}`}</TableCell>
+        <TableCell>{row?.fullName}</TableCell>
         <TableCell>{row.email}</TableCell>
 
         <TableCell>
