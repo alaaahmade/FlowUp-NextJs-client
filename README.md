@@ -22,20 +22,6 @@ Arena's frontend is built using **Next.js**, providing a fast, scalable, and SEO
 
 ---
 
-## 🌜 Frontend Routes
-
-📌 **Base URL:** `https://arena.com`  
-📌 **Authentication Pages:**  
-| Route | Description | Protected |
-|----------------------|----------------------------------|------------|
-| `/login` | User login page | ❌ No |
-| `/register` | User registration page | ❌ No |
-| `/forgot-password` | Password reset request page | ❌ No |
-| `/dashboard` | User dashboard | ✅ Yes |
-| `/profile` | User profile settings | ✅ Yes |
-
----
-
 ## ⚙️ Tech Stack
 
 - **Next.js** (React framework for server-rendered apps)
@@ -51,8 +37,8 @@ Arena's frontend is built using **Next.js**, providing a fast, scalable, and SEO
 ### **1️⃣ Clone the Repository**
 
 ```bash
-git clone https://github.com/your-repo/arena-frontend.git
-cd arena-frontend
+git clone https://github.com/alaaahmade/FlowUp-NextJs-client.git
+cd FlowUp-NextJs-client
 ```
 
 ### **2️⃣ Set Up Environment Variables**
@@ -60,9 +46,8 @@ cd arena-frontend
 Create a `.env.local` file and configure API settings:
 
 ```ini
-NEXT_PUBLIC_API_URL=https://api.arena.com
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id
-NEXT_PUBLIC_APPLE_CLIENT_ID=your-apple-client-id
+NEXT_PUBLIC_API_URL= the link to the server [https://github.com/alaaahmade/FlowUp-NestJs-Api]
+
 ```
 
 ### **3️⃣ Install Dependencies**
@@ -71,10 +56,18 @@ NEXT_PUBLIC_APPLE_CLIENT_ID=your-apple-client-id
 npm install
 ```
 
-### **4️⃣ Start the Development Server**
+### **4️⃣ Start the building**
 
 ```bash
-npm run dev
+npm run build
+```
+
+---
+
+### **4️⃣ Start the Production Server**
+
+```bash
+npm run start
 ```
 
 ---
